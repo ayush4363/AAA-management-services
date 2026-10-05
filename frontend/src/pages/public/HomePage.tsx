@@ -219,7 +219,7 @@ export const HomePage: React.FC = () => {
           backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
         }}
-        className="relative pt-24 pb-16 md:pt-28 md:pb-20 border-b border-[#E6E3DA] overflow-hidden"
+        className="relative pt-20 pb-8 sm:pt-24 sm:pb-12 lg:pt-28 lg:pb-20 border-b border-[#E6E3DA] overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -289,16 +289,16 @@ export const HomePage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Right Column: Flowing Manpower DriftWall in Orange Area */}
+            {/* Right Column: Flowing Manpower DriftWall (Laptops & Desktops Only) */}
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-6 relative w-full flex items-center justify-center lg:justify-end -mt-20 lg:-mt-36"
+              className="hidden lg:flex lg:col-span-6 relative w-full items-center justify-end lg:-mt-36"
             >
               <div
                 style={{ height: 600 }}
-                className="relative w-full max-w-[650px] overflow-visible bg-transparent border-0 -translate-y-16 lg:-translate-y-24"
+                className="relative w-full max-w-[650px] overflow-visible bg-transparent border-0 lg:-translate-y-24"
               >
                 <DriftWall
                   items={MANPOWER_STREAM_ITEMS}
