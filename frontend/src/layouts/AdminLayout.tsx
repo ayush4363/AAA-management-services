@@ -32,7 +32,7 @@ export const AdminLayout: React.FC = () => {
             <img
               src="/images/logo.png"
               alt="AAA Logo"
-              className="w-full h-full object-cover rounded-full"
+              className="w-full h-full object-contain rounded-full p-0.5"
             />
           </div>
           <div>

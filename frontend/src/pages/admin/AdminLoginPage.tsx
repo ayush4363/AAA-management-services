@@ -43,7 +43,7 @@ export const AdminLoginPage: React.FC = () => {
             <img
               src="/images/logo.png"
               alt="AAA Logo"
-              className="w-full h-full object-cover rounded-full"
+              className="w-full h-full object-contain rounded-full p-1"
             />
           </div>
           <h1 className="text-xl font-bold text-[#F3F5F7]">AAA Management Services</h1>

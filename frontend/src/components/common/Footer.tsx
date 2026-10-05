@@ -14,7 +14,7 @@ export const Footer: React.FC = () => {
               <img
                 src="/images/logo.png"
                 alt="AAA Logo"
-                className="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-full shrink-0 shadow-sm"
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-full shrink-0 shadow-sm"
               />
               <span className="font-bold text-base tracking-tight text-[#141518]">
                 AAA Management Services
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
           {/* Verified Headquarters & Coordinates */}
           <div className="md:col-span-4 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-[#141518]">
-              Headquarters
+              HeadOffice
             </h4>
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-2">
@@ -93,22 +93,14 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#C44D2B] shrink-0" />
-                <span>contact@aaamanagementservices.com</span>
+                <span>aaamanagementservices1@gmail.com</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-6 border-t border-[#E6E3DA] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#686873]">
-          <p>© {new Date().getFullYear()} AAA Management Services. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-xs">
-            <span>Operating from Agra, Uttar Pradesh</span>
-            <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-[#141518] text-[11px] text-[#8C8C96]">
-              Internal Portal
-            </Link>
-          </div>
-        </div>
+      
       </div>
     </footer>
   );

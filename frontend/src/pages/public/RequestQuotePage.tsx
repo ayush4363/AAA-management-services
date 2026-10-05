@@ -31,7 +31,6 @@ export const RequestQuotePage: React.FC = () => {
     specialRequirements: '',
   });
 
-  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -57,28 +56,70 @@ export const RequestQuotePage: React.FC = () => {
     setFormData({ ...formData, personnelRequired: updated });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.clientName || !formData.email || !formData.phone || !formData.facilityLocation) {
+    if (
+      !formData.clientName.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim() ||
+      !formData.facilityLocation.trim()
+    ) {
       setErrorMsg('Please complete all mandatory contact and location fields.');
       return;
     }
 
-    setSubmitting(true);
     setErrorMsg('');
 
-    try {
-      const res = await quoteService.submitQuoteRequest(formData);
-      if (res.success) {
-        setSubmitted(true);
-      } else {
-        setErrorMsg(res.message || 'Failed to submit quote request. Please try calling directly.');
-      }
-    } catch (_err) {
-      setErrorMsg('Network error submitting request. Please reach us at 9045393714.');
-    } finally {
-      setSubmitting(false);
+    const customerDetails: string[] = [
+      `Name: ${formData.clientName.trim()}`,
+      `Company / Organization: ${formData.organizationName?.trim() || 'Not specified'}`,
+      `Phone: ${formData.phone.trim()}`,
+      `Email: ${formData.email.trim()}`,
+      `Site / Location: ${formData.facilityLocation.trim()}`,
+    ];
+
+    const personnelList = formData.personnelRequired.map((p) => {
+      const hoursStr = p.shiftHours ? ` (${p.shiftHours} hrs/shift)` : '';
+      return `• ${p.personnelType || 'Security Staff'}: ${p.count || 1} personnel${hoursStr}`;
+    });
+
+    const totalGuardsCount = formData.personnelRequired.reduce((acc, row) => acc + (Number(row.count) || 0), 0);
+
+    const serviceRequirements: string[] = [
+      ...personnelList,
+      `Total Personnel: ${totalGuardsCount}`,
+      `Preferred Duration: ${formData.serviceDurationMonths || 12} Months`,
+    ];
+
+    const sections: string[] = [
+      'Hello AAA Management Services,\n\nI would like to request a quotation for security manpower.',
+      `CUSTOMER DETAILS\n\n${customerDetails.join('\n')}`,
+      `SERVICE REQUIREMENTS\n\n${serviceRequirements.join('\n')}`,
+    ];
+
+    if (formData.specialRequirements?.trim()) {
+      sections.push(`ADDITIONAL REQUIREMENTS\n\n${formData.specialRequirements.trim()}`);
     }
+
+    sections.push('I would like to discuss our site requirements and receive a formal quotation.\n\nThank you.');
+
+    const whatsappMessage = sections.join('\n\n');
+    const targetPhone = '919045393714';
+    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+
+    // Asynchronously record in backend CMS without blocking WhatsApp redirection
+    try {
+      quoteService.submitQuoteRequest(formData).catch(() => {});
+    } catch (_err) {
+      // Non-blocking
+    }
+
+    // Open WhatsApp
+    const win = window.open(whatsappUrl, '_blank');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      window.location.href = whatsappUrl;
+    }
+    setSubmitted(true);
   };
 
   const totalGuards = formData.personnelRequired.reduce((acc, row) => acc + (Number(row.count) || 0), 0);
@@ -112,15 +153,24 @@ export const RequestQuotePage: React.FC = () => {
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h2 className="text-3xl font-bold text-[#141518]">
-                Quotation Request Received
+                Opening WhatsApp
               </h2>
               <p className="text-base sm:text-lg text-[#686873] max-w-lg mx-auto leading-relaxed">
-                Thank you, {formData.clientName}. Your manpower requirement has been received. Our team will contact you to discuss your site needs and provide a quotation.
+                Thank you, {formData.clientName}. You have been taken to WhatsApp with your quotation request pre-filled. Please review the message and press Send to share your requirement with our team.
               </p>
               <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitted(false);
+                  }}
+                  className="px-6 py-3 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold"
+                >
+                  Edit or Submit Another Request
+                </button>
                 <Link
                   to={ROUTES.PUBLIC.HOME}
-                  className="px-6 py-3 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold"
+                  className="px-6 py-3 rounded-full bg-[#F3F1EB] text-[#141518] hover:bg-[#EBE8E0] text-sm font-semibold border border-[#E6E3DA]"
                 >
                   Return to Overview
                 </Link>
@@ -351,10 +401,9 @@ export const RequestQuotePage: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-2">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-3.5 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold transition-all shadow-sm disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-3.5 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold transition-all shadow-sm"
                 >
-                  <span>{submitting ? 'Submitting...' : 'Request Quote'}</span>
+                  <span>Request Quote</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>

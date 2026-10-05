@@ -23,11 +23,11 @@ export class PricingService {
     count: number = 1
   ): { breakdown: BreakdownResult; totalMonthly: number } {
     const basic = config.basicWage || 0;
-    const pfRate = (config.pfRatePercent || 13) / 100;
+    const pfRate = (config.pfRatePercent || 13.01) / 100;
     const esiRate = (config.esiRatePercent || 3.25) / 100;
     const bonusRate = (config.bonusRatePercent || 8.33) / 100;
-    const elRate = (config.leaveWithWagesPercent || 5) / 100;
-    const uniform = config.uniformAllowance || 0;
+    const elRate = (config.leaveWithWagesPercent || 4.8077) / 100;
+    const uniform = config.uniformAllowance !== undefined ? config.uniformAllowance : 200;
     const serviceRate = (config.serviceChargePercent || 10) / 100;
     const gstRate = (config.gstPercent || 18) / 100;
 
@@ -39,8 +39,8 @@ export class PricingService {
     const costBeforeMargin = basic + pf + esi + bonus + el + uniform;
     const serviceCharge = Math.round(costBeforeMargin * serviceRate);
     const subtotal = costBeforeMargin + serviceCharge;
-    const gst = Math.round(subtotal * gstRate);
-    const finalPerPerson = subtotal + gst;
+    const gst = 0; // GST is payable extra as per govt rules, not added to basic quote
+    const finalPerPerson = subtotal;
 
     const breakdown: BreakdownResult = {
       basicWage: basic,

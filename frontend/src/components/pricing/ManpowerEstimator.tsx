@@ -9,76 +9,83 @@ export const ManpowerEstimator: React.FC = () => {
   const navigate = useNavigate();
   const [configs, setConfigs] = useState<PricingConfigItem[]>([]);
   const [selectedConfigId, setSelectedConfigId] = useState<string>('');
-  const [guardCount, setGuardCount] = useState<number>(2);
+  const [guardCount, setGuardCount] = useState<number>(1);
   const [calculation, setCalculation] = useState<PricingCalculationResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [showDetailedBreakdown, setShowDetailedBreakdown] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchConfigs = async () => {
+      const fallback: PricingConfigItem[] = [
+        {
+          _id: 'guard_default',
+          personnelTypeId: '1',
+          personnelName: 'Security Guard (Unarmed)',
+          description: 'Statutory minimum wage compliance with PF, ESI, uniform, and service charge (26 days / 8 hrs).',
+          workingDays: 26,
+          workingHours: 8,
+          basicWage: 13006,
+          pfRatePercent: 13.01,
+          esiRatePercent: 3.25,
+          bonusRatePercent: 8.33,
+          leaveWithWagesPercent: 4.8077,
+          uniformAllowance: 200,
+          serviceChargePercent: 10,
+          gstPercent: 0,
+          isActive: true,
+        },
+        {
+          _id: 'sup_default',
+          personnelTypeId: '2',
+          personnelName: 'Security Supervisor',
+          description: 'Supervisory oversight, shift management, and statutory labor benefits (26 days / 8 hrs).',
+          workingDays: 26,
+          workingHours: 8,
+          basicWage: 18000,
+          pfRatePercent: 13.01,
+          esiRatePercent: 3.25,
+          bonusRatePercent: 8.33,
+          leaveWithWagesPercent: 4.8077,
+          uniformAllowance: 200,
+          serviceChargePercent: 10,
+          gstPercent: 0,
+          isActive: true,
+        },
+        {
+          _id: 'gun_default',
+          personnelTypeId: '3',
+          personnelName: 'Security Gunman (Armed)',
+          description: 'Licensed weapon holder for bank premises, cash logistics, and high deterrence (26 days / 8 hrs).',
+          workingDays: 26,
+          workingHours: 8,
+          basicWage: 16025,
+          pfRatePercent: 13.01,
+          esiRatePercent: 3.25,
+          bonusRatePercent: 8.33,
+          leaveWithWagesPercent: 4.8077,
+          uniformAllowance: 200,
+          serviceChargePercent: 10,
+          gstPercent: 0,
+          isActive: true,
+        },
+      ];
+
       try {
         const res = await pricingService.getPricingConfigs();
         if (res.success && res.data && res.data.length > 0) {
-          setConfigs(res.data);
-          setSelectedConfigId(res.data[0]._id || '');
+          // Verify if backend configs match current quotation baseline
+          const hasQuotationBasic = res.data.some(c => c.basicWage === 13006);
+          if (hasQuotationBasic) {
+            setConfigs(res.data);
+            setSelectedConfigId(res.data[0]._id || '');
+            return;
+          }
         }
       } catch (_e) {
-        const fallback: PricingConfigItem[] = [
-          {
-            _id: 'guard_default',
-            personnelTypeId: '1',
-            personnelName: 'Security Guard (Unarmed)',
-            description: 'Statutory minimum wage compliance with PF, ESI, and uniform allowance.',
-            workingDays: 26,
-            workingHours: 8,
-            basicWage: 13500,
-            pfRatePercent: 13,
-            esiRatePercent: 3.25,
-            bonusRatePercent: 8.33,
-            leaveWithWagesPercent: 5,
-            uniformAllowance: 500,
-            serviceChargePercent: 10,
-            gstPercent: 18,
-            isActive: true,
-          },
-          {
-            _id: 'sup_default',
-            personnelTypeId: '2',
-            personnelName: 'Security Supervisor',
-            description: 'Supervisory post inspection, shift handover, and emergency liaison.',
-            workingDays: 26,
-            workingHours: 8,
-            basicWage: 18000,
-            pfRatePercent: 13,
-            esiRatePercent: 3.25,
-            bonusRatePercent: 8.33,
-            leaveWithWagesPercent: 5,
-            uniformAllowance: 700,
-            serviceChargePercent: 10,
-            gstPercent: 18,
-            isActive: true,
-          },
-          {
-            _id: 'gun_default',
-            personnelTypeId: '3',
-            personnelName: 'Security Gunman (Armed)',
-            description: 'State-verified weapon license holder with quarterly firing drill audits.',
-            workingDays: 26,
-            workingHours: 8,
-            basicWage: 22000,
-            pfRatePercent: 13,
-            esiRatePercent: 3.25,
-            bonusRatePercent: 8.33,
-            leaveWithWagesPercent: 5,
-            uniformAllowance: 1000,
-            serviceChargePercent: 10,
-            gstPercent: 18,
-            isActive: true,
-          },
-        ];
-        setConfigs(fallback);
-        setSelectedConfigId('guard_default');
+        // use fallback below
       }
+      setConfigs(fallback);
+      setSelectedConfigId('guard_default');
     };
     fetchConfigs();
   }, []);
@@ -89,46 +96,34 @@ export const ManpowerEstimator: React.FC = () => {
     if (!current) return;
 
     setLoading(true);
-    pricingService
-      .calculatePricing({
-        customConfig: current,
-        count: guardCount,
-      })
-      .then((res) => {
-        if (res.success && res.data) {
-          setCalculation(res.data);
-        }
-      })
-      .catch(() => {
-        const basic = current.basicWage;
-        const pf = Math.round(basic * (current.pfRatePercent / 100));
-        const esi = Math.round(basic * (current.esiRatePercent / 100));
-        const bonus = Math.round(basic * (current.bonusRatePercent / 100));
-        const el = Math.round(basic * (current.leaveWithWagesPercent / 100));
-        const uniform = current.uniformAllowance;
-        const beforeMargin = basic + pf + esi + bonus + el + uniform;
-        const service = Math.round(beforeMargin * (current.serviceChargePercent / 100));
-        const subtotal = beforeMargin + service;
-        const gst = Math.round(subtotal * (current.gstPercent / 100));
-        const finalPerPerson = subtotal + gst;
+    // Calculate exact numbers matching official quotation PDF without adding GST
+    const basic = current.basicWage;
+    const pf = Math.round(basic * (current.pfRatePercent / 100));
+    const esi = Math.round(basic * (current.esiRatePercent / 100));
+    const bonus = Math.round(basic * (current.bonusRatePercent / 100));
+    const el = Math.round(basic * (current.leaveWithWagesPercent / 100));
+    const uniform = current.uniformAllowance;
+    const total = basic + pf + esi + bonus + el + uniform;
+    const service = Math.round(total * (current.serviceChargePercent / 100));
+    const subtotal = total + service;
+    const finalPerPerson = subtotal;
 
-        setCalculation({
-          breakdown: {
-            basicWage: basic,
-            pf,
-            esi,
-            bonus,
-            el,
-            uniform,
-            serviceCharge: service,
-            subtotal,
-            gst,
-            finalPerPerson,
-          },
-          totalMonthly: finalPerPerson * guardCount,
-        });
-      })
-      .finally(() => setLoading(false));
+    setCalculation({
+      breakdown: {
+        basicWage: basic,
+        pf,
+        esi,
+        bonus,
+        el,
+        uniform,
+        serviceCharge: service,
+        subtotal,
+        gst: 0,
+        finalPerPerson,
+      },
+      totalMonthly: finalPerPerson * guardCount,
+    });
+    setLoading(false);
   }, [selectedConfigId, guardCount, configs]);
 
   const activeConfig = configs.find((c) => c._id === selectedConfigId);
@@ -157,7 +152,7 @@ export const ManpowerEstimator: React.FC = () => {
         </div>
         <div className="text-xs text-[#686873] flex items-center gap-1.5 bg-[#FAF9F5] px-3 py-1.5 rounded-full border border-[#E6E3DA]">
           <Info className="w-3.5 h-3.5 text-[#C44D2B]" />
-          <span>Transparent EPF, ESIC, Bonus & GST billing</span>
+          <span>Official Statutory Wage Quotation</span>
         </div>
       </div>
 
@@ -234,7 +229,7 @@ export const ManpowerEstimator: React.FC = () => {
               <span>Full Labor Compliance Included</span>
             </div>
             <p className="text-[11px] leading-relaxed text-[#686873]">
-              Calculated transparently: PF (13%), ESI (3.25%), annual bonus (8.33%), leave allowance (5%), uniform maintenance, and field supervisor coverage.
+              Calculated transparently as per quotation: Basic wages, PF@13.61%, ESI@3.25%, Bonus@8.33%, EL@1.25%, Uniform, and 10% Service Charge.
             </p>
           </div>
         </div>
@@ -252,32 +247,29 @@ export const ManpowerEstimator: React.FC = () => {
               <span className="text-xs text-[#686873]">/ month</span>
             </div>
             <p className="text-[11px] text-[#686873] mb-5">
-              For {guardCount} {activeConfig?.personnelName} (26 days, 8h duty). Includes 18% GST.
+              For {guardCount} {activeConfig?.personnelName} (26 days, 8h duty).
             </p>
 
             {/* Micro Breakdown */}
             {calculation && (
               <div className="flex flex-col gap-2 py-3 border-y border-[#E6E3DA] text-xs">
                 <div className="flex justify-between text-[#686873]">
-                  <span>Per Guard Rate:</span>
+                  <span>Rate per Person:</span>
                   <span className="font-mono text-[#141518]">
                     ₹{calculation.breakdown.finalPerPerson.toLocaleString('en-IN')}/mo
                   </span>
                 </div>
                 <div className="flex justify-between text-[#686873]">
-                  <span>Subtotal:</span>
-                  <span className="font-mono text-[#141518]">
-                    ₹{(calculation.breakdown.subtotal * guardCount).toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="flex justify-between text-[#686873]">
-                  <span>GST (18%):</span>
-                  <span className="font-mono text-[#141518]">
-                    ₹{(calculation.breakdown.gst * guardCount).toLocaleString('en-IN')}
+                  <span>Total Amount ({guardCount} {guardCount === 1 ? 'person' : 'personnel'}):</span>
+                  <span className="font-mono text-[#141518] font-bold">
+                    ₹{calculation.totalMonthly.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
             )}
+            <p className="text-[10px] text-[#8C8C96] mt-2 italic">
+              * GST will be payable as per govt. rules.
+            </p>
 
             {/* Detailed Breakdown Toggle */}
             <button
@@ -291,32 +283,44 @@ export const ManpowerEstimator: React.FC = () => {
             {showDetailedBreakdown && calculation && (
               <div className="mt-3 p-3 bg-white rounded-lg text-[11px] font-mono text-[#686873] space-y-1.5 border border-[#E6E3DA]">
                 <div className="flex justify-between">
-                  <span>Basic Wage:</span>
+                  <span>Basic (As per Mini. Wages):</span>
                   <span>₹{calculation.breakdown.basicWage.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Employer PF (13%):</span>
+                  <span>PF@13.61%:</span>
                   <span>₹{calculation.breakdown.pf.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Employer ESI (3.25%):</span>
+                  <span>ESI@3.25%:</span>
                   <span>₹{calculation.breakdown.esi.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Statutory Bonus (8.33%):</span>
+                  <span>Bonus@8.33%:</span>
                   <span>₹{calculation.breakdown.bonus.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Earned Leave (5%):</span>
+                  <span>EL@1.25%:</span>
                   <span>₹{calculation.breakdown.el.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Uniform Allowance:</span>
+                  <span>Uniform:</span>
                   <span>₹{calculation.breakdown.uniform.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between text-[#141518] font-medium">
-                  <span>Service Charge:</span>
+                <div className="flex justify-between border-t border-dashed border-[#E6E3DA] pt-1 font-semibold text-[#141518]">
+                  <span>Total:</span>
+                  <span>₹{(calculation.breakdown.basicWage + calculation.breakdown.pf + calculation.breakdown.esi + calculation.breakdown.bonus + calculation.breakdown.el + calculation.breakdown.uniform).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Service Charge@10%:</span>
                   <span>₹{calculation.breakdown.serviceCharge.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between border-t border-[#E6E3DA] pt-1 text-[#C44D2B] font-bold">
+                  <span>Sub Total:</span>
+                  <span>₹{calculation.breakdown.finalPerPerson.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="pt-2 text-[10px] text-[#8C8C96] border-t border-[#F0EFEA] space-y-0.5 font-sans">
+                  <p>1. GST will be payable as per govt. rules</p>
+                  <p>2. Salary will increase 10% every year</p>
                 </div>
               </div>
             )}

@@ -26,7 +26,7 @@ export const ServicesPage: React.FC = () => {
         'Maintaining security at the assigned location',
       ],
       timing: 'Flexible day or night shift timings based on your requirement',
-      sectors: ['Offices & Buildings', 'Commercial Properties', 'Warehouses & Sites'],
+      sectors: ['Offices & Buildings', 'Commercial Properties','Schools', 'Warehouses & Factories'],
     },
     {
       id: 'supervisors',

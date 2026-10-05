@@ -239,7 +239,7 @@ export const HomePage: React.FC = () => {
 
               {/* Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#141518] leading-[1.08]">
-                Professional Security Services,{' '}
+                Trusted Security Services,{' '}
                 <span className="font-serif italic font-normal text-[#141518]">
                   Built Around Your Needs.
                 </span>
@@ -377,7 +377,7 @@ export const HomePage: React.FC = () => {
                   {
                     section: '§ 02',
                     title: 'Security Guards',
-                    desc: 'Security guards for offices, buildings, properties, and other locations that need regular security personnel.',
+                    desc: 'Security guards for offices, buildings,Schools,Factories, properties, and other locations that need regular security personnel.',
                   },
                   {
                     section: '§ 03',

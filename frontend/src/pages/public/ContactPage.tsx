@@ -22,49 +22,78 @@ export const ContactPage: React.FC = () => {
     message: '',
   });
 
-  const [submitting, setSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) {
+    if (!formData.fullName.trim() || !formData.phone.trim()) {
       setErrorMsg('Please enter your name and phone number.');
       return;
     }
 
-    setSubmitting(true);
     setErrorMsg('');
 
-    const formattedMessage = [
-      formData.location ? `Location: ${formData.location}` : '',
-      formData.guardCount ? `Guards: ${formData.guardCount}` : '',
-      formData.supervisorCount ? `Supervisors: ${formData.supervisorCount}` : '',
-      formData.gunmanCount ? `Gunmen: ${formData.gunmanCount}` : '',
-      formData.message ? `Requirements: ${formData.message}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const customerDetails: string[] = [
+      `Name: ${formData.fullName.trim()}`,
+      `Company / Organization: ${formData.organizationName?.trim() || 'Not specified'}`,
+      `Phone: ${formData.phone.trim()}`,
+      `Email: ${formData.email?.trim() || 'Not specified'}`,
+      `Location: ${formData.location?.trim() || 'Not specified'}`,
+    ];
 
-    try {
-      const res = await enquiryService.submitEnquiry({
-        fullName: formData.fullName,
-        email: formData.email || 'not-provided@client.local',
-        phone: formData.phone,
-        serviceType: formData.serviceType,
-        organizationName: formData.organizationName,
-        message: formattedMessage || 'Security requirement inquiry',
-      });
-      if (res.success) {
-        setSubmitted(true);
-      } else {
-        setErrorMsg(res.message || 'Submission failed. Please call us directly.');
-      }
-    } catch (_err) {
-      setErrorMsg('Could not submit inquiry right now. Please call us at 9045393714.');
-    } finally {
-      setSubmitting(false);
+    const serviceRequirements: string[] = [
+      `Service Required: ${formData.serviceType || 'Security Guards'}`,
+      `Number of Guards: ${formData.guardCount?.trim() || 'Not specified'}`,
+      `Number of Supervisors: ${formData.supervisorCount?.trim() || 'Not specified'}`,
+      `Number of Gunmen: ${formData.gunmanCount?.trim() || 'Not specified'}`,
+    ];
+
+    const sections: string[] = [
+      'Hello AAA Management Services,\n\nI would like to enquire about your security services.',
+     
+      `CUSTOMER DETAILS\n\n${customerDetails.join('\n')}`,
+      `SERVICE REQUIREMENTS\n\n${serviceRequirements.join('\n')}`,
+    ];
+
+    if (formData.message?.trim()) {
+      sections.push(`ADDITIONAL REQUIREMENTS\n\n${formData.message.trim()}`);
     }
+
+    sections.push('I would like to discuss the requirements and receive a quotation.\n\nThank you.');
+
+    const whatsappMessage = sections.join('\n\n');
+    const targetPhone = '919045393714';
+    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+
+    // Asynchronously record in backend CMS without blocking WhatsApp redirection
+    try {
+      enquiryService.submitEnquiry({
+        fullName: formData.fullName.trim(),
+        email: formData.email?.trim() || 'not-provided@client.local',
+        phone: formData.phone.trim(),
+        serviceType: formData.serviceType,
+        organizationName: formData.organizationName?.trim(),
+        message: [
+          formData.location ? `Location: ${formData.location}` : '',
+          formData.guardCount ? `Guards: ${formData.guardCount}` : '',
+          formData.supervisorCount ? `Supervisors: ${formData.supervisorCount}` : '',
+          formData.gunmanCount ? `Gunmen: ${formData.gunmanCount}` : '',
+          formData.message ? `Requirements: ${formData.message}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n') || 'Security requirement enquiry',
+      }).catch(() => {});
+    } catch (_err) {
+      // Non-blocking
+    }
+
+    // Open WhatsApp
+    const win = window.open(whatsappUrl, '_blank');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      window.location.href = whatsappUrl;
+    }
+    setSubmitted(true);
   };
 
   return (
@@ -135,9 +164,9 @@ export const ContactPage: React.FC = () => {
                   <div className="w-14 h-14 rounded-full bg-[#FBF0EC] text-[#C44D2B] flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#141518]">Thank You</h3>
+                  <h3 className="text-2xl font-bold text-[#141518]">Opening WhatsApp</h3>
                   <p className="text-base sm:text-lg text-[#686873] max-w-md mx-auto leading-relaxed">
-                    Your enquiry has been received. We will contact you regarding your requirement.
+                    You have been taken to WhatsApp with your enquiry details pre-filled. Please review the message and press Send to share your requirement with our team.
                   </p>
                   <button
                     type="button"
@@ -325,10 +354,9 @@ export const ContactPage: React.FC = () => {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={submitting}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-3.5 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold transition-all shadow-sm disabled:opacity-50"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-3.5 rounded-full bg-[#141518] text-white hover:bg-[#26272B] text-sm font-semibold transition-all shadow-sm"
                     >
-                      <span>{submitting ? 'Submitting...' : 'Submit Enquiry'}</span>
+                      <span>Submit Enquiry</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>

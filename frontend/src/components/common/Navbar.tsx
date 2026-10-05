@@ -29,7 +29,7 @@ export const Navbar: React.FC = () => {
           <img
             src="/images/logo.png"
             alt="AAA Logo"
-            className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-full transition-transform group-hover:scale-105 shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full transition-transform group-hover:scale-105 shrink-0"
           />
           <div className="flex flex-col pr-1">
             <span className="font-bold text-sm tracking-tight text-[#141518] leading-tight">
