@@ -37,6 +37,65 @@ if (env.NODE_ENV !== 'test') {
 // Mount API v1 router
 app.use('/api/v1', apiV1Router);
 
+// Google Search Console verification endpoint
+app.get('/google710cf0c1af6abd62.html', (_req, res) => {
+  res.type('text/html').send('google-site-verification: google710cf0c1af6abd62.html');
+});
+
+// Robots.txt
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send('User-agent: *\nAllow: /\n\nSitemap: https://aaamanagementservices.in/sitemap.xml\n');
+});
+
+// Sitemap.xml
+app.get('/sitemap.xml', (_req, res) => {
+  res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://aaamanagementservices.in/</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/services</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/request-quote</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/about</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/contact</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/gallery</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aaamanagementservices.in/faq</loc>
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>`);
+});
+
 // Root informational endpoint
 app.get('/', (_req, expressRes) => {
   expressRes.json({
