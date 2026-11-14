@@ -44,12 +44,14 @@ app.get('/google710cf0c1af6abd62.html', (_req, res) => {
 
 // Robots.txt
 app.get('/robots.txt', (_req, res) => {
-  res.type('text/plain').send('User-agent: *\nAllow: /\n\nSitemap: https://aaamanagementservices.in/sitemap.xml\n');
+  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.send('User-agent: *\nAllow: /\n\nSitemap: https://aaamanagementservices.in/sitemap.xml\n');
 });
 
 // Sitemap.xml
 app.get('/sitemap.xml', (_req, res) => {
-  res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+  res.set('Content-Type', 'application/xml; charset=utf-8');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://aaamanagementservices.in/</loc>
