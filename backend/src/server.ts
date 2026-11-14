@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -98,13 +100,43 @@ app.get('/sitemap.xml', (_req, res) => {
 </urlset>`);
 });
 
-// Root informational endpoint
-app.get('/', (_req, expressRes) => {
-  expressRes.json({
-    name: 'AAA Management Services API',
-    status: 'online',
-    version: '1.0.0',
-    documentation: '/api/v1/health',
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+
+// Serve static assets from frontend build if present
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath, { index: false }));
+}
+
+// Valid frontend routes mapping (serves exact route HTML or index.html)
+const validFrontendRoutes = [
+  '/',
+  '/services',
+  '/about',
+  '/contact',
+  '/request-quote',
+  '/gallery',
+  '/faq',
+];
+
+validFrontendRoutes.forEach((route) => {
+  app.get([route, `${route}/`], (_req, res) => {
+    const routeName = route === '/' ? 'index' : route.slice(1);
+    const specificHtml = path.join(frontendDistPath, `${routeName}.html`);
+    const indexHtml = path.join(frontendDistPath, 'index.html');
+
+    if (fs.existsSync(specificHtml)) {
+      return res.sendFile(specificHtml);
+    }
+    if (fs.existsSync(indexHtml)) {
+      return res.sendFile(indexHtml);
+    }
+    res.json({
+      name: 'AAA Management Services API',
+      status: 'online',
+      version: '1.0.0',
+      route,
+      documentation: '/api/v1/health',
+    });
   });
 });
 
