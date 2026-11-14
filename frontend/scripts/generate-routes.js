@@ -24,9 +24,9 @@ const template = fs.readFileSync(templatePath, 'utf-8');
 const routes = [
   {
     path: 'services',
-    title: 'Security Services & Guard Deployment | AAA Management Services',
+    title: 'Security Services in Agra | Guard Agency & Manpower | AAA Management Services',
     description:
-      'Professional security services in Agra: unarmed security guards, licensed armed escorts, night patrol officers, and facility sentries.',
+      'Professional security services in Agra by AAA Management Services. Hire trained security guards, armed gunmen, supervisors, and industrial security manpower in Uttar Pradesh.',
   },
   {
     path: 'about',
